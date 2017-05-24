@@ -4,11 +4,11 @@ import path from 'path';
 import bodyParser from 'body-parser';
 
 //database and schema
-import { Schema } from './data/schema';
-import db from './data';
-import config from './config';
+// import { Schema } from './data/schema';
+import sequelize from './data/models/models';
+import config from './data/config';
 
-const GRAPHQL_PORT = config.port;
+const GRAPHQL_PORT = config.PORT;
 
 let graphQLServer;
 
@@ -22,14 +22,14 @@ app.use(bodyParser.json()) //parsing application/json
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.text({ type: 'application/graphql' }));
 
-app.use('/graphql', graphQLHTTP({
-  graphiql: true,
-  pretty: true,
-  schema: Schema,
-  formatError: error => ({
-    message: error.message,
-  })
-}));
+// app.use('/graphql', graphQLHTTP({
+//   graphiql: true,
+//   pretty: true,
+//   schema: Schema,
+//   formatError: error => ({
+//     message: error.message,
+//   })
+// }));
 
 app.get('*', (req, res) => {
   res.json({

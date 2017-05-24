@@ -1,25 +1,37 @@
-//create connection to mysql
-import { database, username, password, host, dialect } from '../../config';
+'use strict';
+//TODO: set up migration flow using config.json in config folder
+//This index file created with sequelize: init
+var fs        = require('fs');
+var path      = require('path');
+var Sequelize = require('sequelize');
+var basename  = path.basename(module.filename);
+var env       = process.env.NODE_ENV || 'development';
+var config    = require(__dirname + '/../../config/config.json')[env];
+var db        = {};
 
-const sequelize = new Sequelize(database, username, password, {
-  host: host, 
-  dialect: dialect,
-  pool: {
-    max: 5, 
-    min: 0,
-    idle: 10000,
-  }
-};
+if (config.use_env_variable) {
+  var sequelize = new Sequelize(process.env[config.use_env_variable]);
+} else {
+  var sequelize = new Sequelize(config.database, config.username, config.password, config);
+}
 
-//test connection
-sequelize
-  .authenticate()
-  .then(() => {
-    console.log('Connection has been established successly');
+fs
+  .readdirSync(__dirname)
+  .filter(function(file) {
+    return (file.indexOf('.') !== 0) && (file !== basename) && (file.slice(-3) === '.js');
   })
-  .catch(err => {
-    console.error('Unable to connect to database: ', err);
+  .forEach(function(file) {
+    var model = sequelize['import'](path.join(__dirname, file));
+    db[model.name] = model;
   });
 
-export sequelize;
-  
+Object.keys(db).forEach(function(modelName) {
+  if (db[modelName].associate) {
+    db[modelName].associate(db);
+  }
+});
+
+db.sequelize = sequelize;
+db.Sequelize = Sequelize;
+
+module.exports = db;
